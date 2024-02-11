@@ -1,5 +1,9 @@
 import itertools
 import random
+import networkx as nx
+
+# 10k source: https://github.com/first20hours/google-10000-english/blob/master/google-10000-english.txt
+# 25k source: https://github.com/gautesolheim/25000-syllabified-words-list/blob/master/25K-syllabified-sorted-alphabetically.txt
 
 class Solver(object):
     def __init__(self, box, max_words, corpus=None):
@@ -83,6 +87,13 @@ class Solver(object):
             self.letters_used.update(set(word))
             self.letters_remaining = self.str_set - self.letters_used
             self.next_word_starts_with = word[-1]
+            
+            # In theory you might need to add a step where you take a word that's
+            # been added to the solution set out of the list of filtered words so
+            # you don't repeat words in a solution. H O W E V E R . . . a word
+            # you've already used will score a "0" on the "how many new letters
+            # does this word provide" scale, so it should never be chosen as a
+            # subsequent word
 
             if len(self.letters_used) == len(self.str_set):
                 print("SOLUTION: ", self.fast_solution)
@@ -96,6 +107,36 @@ class Solver(object):
 
         return self.fast_solution
     
+    def solve_full(self):
+        """
+        (how="full") - brute-force listing of all possible winning moves
+        """
+        # Make dictionary of all available words and subsequent words they can link to
+        word_links = {w1: list(filter(lambda w2: w2[0] == w1[-1] and w2 != w1, self.filt_words)) for w1 in self.filt_words}
+
+        # For each word in the word_links dict, create all possible paths that:
+        # 1. use all letters in the required set
+        # 2. don't exceed the max number of allowable words
+        # have to build this iteratively so that we're not using more words than necessary in any given solution
+        DG = nx.DiGraph()
+        node_list = list(word_links.keys())
+        edge_list = []
+        for k in word_links.keys():
+            for v in word_links[k]:
+                edge_list.append((k,v))
+        
+        DG.add_nodes_from(node_list)
+        DG.add_edges_from(edge_list)
+
+        solution_set = []
+        for s in DG.nodes:
+            for t in DG.nodes:
+                for path in nx.all_simple_paths(DG, source=s, target=t):
+                    if len(path) <= self.max_words and len(self.str_set) == len(''.join(path)):
+                        solution_set.append(path)
+                    else:
+                        continue
+            
     def solve(self, how="fast"):
         """
         """
@@ -103,15 +144,3 @@ class Solver(object):
             self.solve_fast()
         else:
             pass
-
-
-
-# 10k source: https://github.com/first20hours/google-10000-english/blob/master/google-10000-english.txt
-# 25k source: https://github.com/gautesolheim/25000-syllabified-words-list/blob/master/25K-syllabified-sorted-alphabetically.txt
-
-# (how="all") - brute-force listing of all possible winning moves
-
-# (how="random") where a random word is picked, then another
-# random word, and so on and so forth until either the solution condition
-# is met or the number of words is maxed out, in which case another random
-# word is selected and on we go
