@@ -107,35 +107,35 @@ class Solver(object):
 
         return self.fast_solution
     
-    def solve_full(self):
-        """
-        (how="full") - brute-force listing of all possible winning moves
-        """
-        # Make dictionary of all available words and subsequent words they can link to
-        word_links = {w1: list(filter(lambda w2: w2[0] == w1[-1] and w2 != w1, self.filt_words)) for w1 in self.filt_words}
+    # def solve_full(self):
+    #     """
+    #     (how="full") - brute-force listing of all possible winning moves
+    #     """
+    #     # Make dictionary of all available words and subsequent words they can link to
+    #     word_links = {w1: list(filter(lambda w2: w2[0] == w1[-1] and w2 != w1, self.filt_words)) for w1 in self.filt_words}
 
-        # For each word in the word_links dict, create all possible paths that:
-        # 1. use all letters in the required set
-        # 2. don't exceed the max number of allowable words
-        # have to build this iteratively so that we're not using more words than necessary in any given solution
-        DG = nx.DiGraph()
-        node_list = list(word_links.keys())
-        edge_list = []
-        for k in word_links.keys():
-            for v in word_links[k]:
-                edge_list.append((k,v))
+    #     # For each word in the word_links dict, create all possible paths that:
+    #     # 1. use all letters in the required set
+    #     # 2. don't exceed the max number of allowable words
+    #     # have to build this iteratively so that we're not using more words than necessary in any given solution
+    #     DG = nx.DiGraph()
+    #     node_list = list(word_links.keys())
+    #     edge_list = []
+    #     for k in word_links.keys():
+    #         for v in word_links[k]:
+    #             edge_list.append((k,v))
         
-        DG.add_nodes_from(node_list)
-        DG.add_edges_from(edge_list)
+    #     DG.add_nodes_from(node_list)
+    #     DG.add_edges_from(edge_list)
 
-        solution_set = []
-        for s in DG.nodes:
-            for t in DG.nodes:
-                for path in nx.all_simple_paths(DG, source=s, target=t):
-                    if len(path) <= self.max_words and len(self.str_set) == len(''.join(path)):
-                        solution_set.append(path)
-                    else:
-                        continue
+    #     solution_set = []
+    #     for s in DG.nodes:
+    #         for t in DG.nodes:
+    #             for path in nx.all_simple_paths(DG, source=s, target=t):
+    #                 if len(path) <= self.max_words and len(self.str_set) == len(''.join(path)):
+    #                     solution_set.append(path)
+    #                 else:
+    #                     continue
             
     def solve(self, how="fast"):
         """
