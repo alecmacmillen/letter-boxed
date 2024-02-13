@@ -59,6 +59,18 @@ class Solver(object):
     def solve_fast(self):
         """
         """
+        ### POTENTIAL FUTURE DEVELOPMENT ###
+        # An option for solving with hardest/most uncommon letters first
+        # Use a hard-coded dict of letter frequency and bias selection of words
+        # towards the least common letters first - that would prevent starting
+        # with long words that use up 90% of the letters and then using a bunch
+        # of junk/short words that reuse letters just to access the last letter
+        # that needs to be hit
+        # example: box is vhw/tdr/oje/auc
+        # fast solution gives watchtower/revered/dutch/hot/taj
+        # watchtower comes first because it uses the most letters but
+        # you have to reuse a bunch of letters to get to taj at the end
+        # because j is so rare
         self.fast_solution = []
         self.letters_used = set()
         self.letters_remaining = self.str_set - self.letters_used
